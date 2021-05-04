@@ -79,9 +79,16 @@ async def on_message(message):
     await message.channel.send(quote)
 
   if message.content.startswith('$roll'):
-    x = random.randrange(0, 100)
+    userNum = random.randrange(0, 100)
+    botNum = random.randrange(0, 100)
     y = message.author.name
-    await message.channel.send(y + ' rolled a ' + str(x) + '!')
+    await message.channel.send('\n' + y + ' rolled a ' + str(userNum) + '! ' + 'LaevusBot rolled a ' + str(botNum) + '!')
+    if userNum > botNum:
+      await message.add_reaction("LaevusPog:806694928092495913")
+      await message.channel.send('Congratulations!')
+    else:
+      await message.channel.send('Sorry!')
+    
 
   if message.content.startswith('$stream'):
     
