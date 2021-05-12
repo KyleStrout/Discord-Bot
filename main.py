@@ -49,10 +49,12 @@ def getQuote():
 def getTrivia():
   url = "https://numbersapi.p.rapidapi.com/random/trivia"
   querystring = {"json":"true","fragment":"true","max":"20","min":"10"}
+
   headers = {
     'x-rapidapi-key': "0acac537f2msh6f343358ba73dd4p125502jsn473a06834b54",
     'x-rapidapi-host': "numbersapi.p.rapidapi.com"
   }
+
   response = requests.request("GET", url, headers=headers, params=querystring)
   json_data = json.loads(response.text)
   updateTrivia(json_data)
@@ -70,6 +72,31 @@ def updateTrivia(trivia_data):
 
 def deleteTrivia():
   del db["trivia"]
+
+def getTriviaDate():
+  url = "https://numbersapi.p.rapidapi.com/6/21/date"
+  querystring = {"json":"true","fragment":"true"}
+
+  headers = {
+    'x-rapidapi-key': "0acac537f2msh6f343358ba73dd4p125502jsn473a06834b54",
+    'x-rapidapi-host': "numbersapi.p.rapidapi.com"
+  }
+
+  response = requests.request("GET", url, headers=headers, params=querystring)
+  json_data = json.loads(response.text)
+  updateTriviaDate(json_data)
+
+def updateTriviaDate(triviaDate):
+  if "triviaDate" in db.keys():
+    deleteTriviaDate()
+    db["triviaDate"] = triviaDate
+
+    # else, creates new entry in db
+  else:
+    db["triviaDate"] = triviaDate
+
+def deleteTriviaDate():
+  del db["triviaDate"]
 
 @client.event
 async def on_ready():
@@ -102,8 +129,8 @@ async def on_message(message):
 
   if message.content.startswith('$stream'):
     is_user_live()
-    
-  if message.content.startswith('$trivia'):
+      
+  if message.content.startswith('$trivia random'):
     getTrivia()
     await message.channel.send(db["trivia"]['text'])
 
@@ -118,6 +145,23 @@ async def on_message(message):
     else:
       await message.add_reaction("Pepega:784646222577139732")
         
+  if message.content.startswith('$trivia dates'):
+    getTriviaDate()
+    await message.channel.send(db["triviaDate"]['text'])
+
+  if message.content.startswith('$date'):
+    msg = message.content
+    userAnswer = int(msg.split("$date", 1)[1])
+    answer = db["triviaDate"]['year']
+
+    if userAnswer == answer:
+      await message.add_reaction("5Head:784646128209494016")
+
+    else:
+      await message.add_reaction("Pepega:784646222577139732")
+
+  
+
     
 
     
