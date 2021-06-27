@@ -18,12 +18,23 @@ from replit import db
 my_secret = os.environ['TOKEN']
 CID = os.environ['CLIENT_ID']
 OATH_TOKEN = os.environ['OATH_TOKEN']  
-TWITCH_SECRET = 'blueberry'
+client_secret = os.environ['TWITCH_CLIENT_SECRET']
+TWITCH_SECRET = os.environ['Webhook_Secret']
 streamer_name = 'laevus'
+oAuth_Token = ""
 
 
 client = discord.Client()
 
+def test(data):
+  return data
+  # 839092761584074832
+
+async def send_message(data):
+  channel = client.get_channel(839092761584074832)
+  await channel.send('hello' + data)
+
+# doesnt work for some reason
 def is_user_live():
     endpoint = 'https://api.twitch.tv/helix/streams'
     my_headers = {
@@ -37,6 +48,77 @@ def is_user_live():
     if len(data) == 0:
         return False
 
+# channel:read:redemptions
+#gets access token from cid and csecret
+def get_token():
+  url = "https://id.twitch.tv/oauth2/token"
+  data = {
+  'client_id': CID,
+  'client_secret': client_secret,
+  'grant_type': "client_credentials"
+  }
+
+  request = requests.post(url, data)
+
+  json_data = json.loads(request.text)
+  access_token = str(json_data["access_token"])
+  #print('token: ' + access_token)
+  return access_token
+
+def allow():
+  url = 'https://id.twitch.tv/oauth2/authorize'
+  my_params = {
+    "client_id": CID,
+    "redirect_uri": "https://Laevus-Bot.kylestrout.repl.co",
+    "response_type": "code",
+    "scope": "channel:read:redemptions"
+  }
+
+  response = requests.get(url, params=my_params)
+  print(response)
+
+  my_params2 = {
+    'broadcaster_id': '164713504'
+  }
+  response2 = requests.get('https://api.twitch.tv/helix/subscriptions', params=my_params2)
+  print(response2)
+  #data = response.json()
+  #print(data)
+  return response
+
+def create_subscription(token):
+
+  url = "https://api.twitch.tv/helix/eventsub/subscriptions"
+  my_headers = {
+    'Client-ID': CID,
+    'Authorization': "Bearer " + token,
+    'Content-Type': 'application/json'
+  }
+
+
+  data = {
+    "type": "channel.channel_points_custom_reward_redemption.add",
+    "version": "1",
+    "condition": {
+        "broadcaster_user_id": "164713504"
+    },
+    "transport": {
+        "method": "webhook",
+        "callback": "https://Laevus-Bot.kylestrout.repl.co/redeem/callback",
+        "secret": TWITCH_SECRET
+    }
+  }
+  #print(data)
+  response = requests.post(url, json=data, headers=my_headers)
+  print(response)
+  #print(json.loads(response.text))
+  #print(response.status_code)
+
+  # 
+
+  #def list_subscriptions():
+
+
 # gets a random quote
 def getQuote():
   response = requests.get('https://zenquotes.io/api/random')
@@ -48,7 +130,10 @@ def getQuote():
 # gets random trivia data question
 def getTrivia():
   url = "https://numbersapi.p.rapidapi.com/random/trivia"
-  querystring = {"json":"true","fragment":"true","max":"20","min":"10"}
+  querystring = {"json":"true",
+  "fragment":"true",
+  "max":"20",
+  "min":"10"}
 
   headers = {
     'x-rapidapi-key': "0acac537f2msh6f343358ba73dd4p125502jsn473a06834b54",
@@ -101,6 +186,10 @@ def deleteTriviaDate():
 @client.event
 async def on_ready():
   print('We have logged in as {0.user}'.format(client))
+  channel = client.get_channel(839092761584074832)
+  await channel.send('Hello')
+  
+
 
 @client.event
 async def on_message(message):
@@ -160,7 +249,14 @@ async def on_message(message):
     else:
       await message.add_reaction("Pepega:784646222577139732")
 
+  if message.content.startswith('$help') or message.content.startswith('$commands'):
+    await message.channel.send("Commands: \n roll dice: $roll \n random trivia: $trivia random \n answer with: $answer [answer] \n date trivia: $trivia dates \n answer with: $date [answer] \n quote: $quote")
   
+  if message.content.startswith('$test'):
+    await test()
+    #allow()
+    #token = get_token()
+    #create_subscription(token)
 
     
 
