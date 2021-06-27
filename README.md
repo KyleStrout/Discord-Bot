@@ -7,6 +7,6 @@ Features:
 - Ask a random date-based trivia question with API using '$trivia dates' 
 - User can answer date trivia with a year using '$date [user answer]'
 - Rolls dice 0-100 against a user roll with outcome using '$roll'
-- (WIP) notifies when stream goes live with Twitch API
+- (WIP) notifies when stream goes live, new followers, cheers, and subscribers with Twitch API
 
 Uses multiple API's for quotes/trivia and a database for trivia questions and answers.
